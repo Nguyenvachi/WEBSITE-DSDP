@@ -1,0 +1,190 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+@section Styles {
+    <style>
+        .login-page-wrapper {
+            background-color: #f0f2f5;
+            padding: 4rem 1rem;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            border: none;
+            border-radius: 12px;
+            max-width: 850px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .login-form-col {
+            padding: 2.5rem 3rem;
+            background-color: #fff;
+        }
+
+        .login-image-col {
+            background-image: url('https://foodmap.asia/static/images/saurieng.png');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: #1f5c34;
+            padding: 2rem;
+        }
+
+            .login-image-col h2 {
+                font-weight: 900;
+                font-size: 2.5rem;
+                line-height: 1.2;
+            }
+
+            .login-image-col p {
+                font-weight: 500;
+                margin-top: 1rem;
+                border-top: 2px solid;
+                border-bottom: 2px solid;
+                padding: 5px 0;
+                display: inline-block;
+            }
+
+        .login-form-col h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .login-form-col .intro-text {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+            .login-form-col .intro-text strong {
+                color: #000;
+            }
+
+        .form-control {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+            .form-control:focus {
+                border-color: #28a745;
+                box-shadow: none;
+            }
+
+        .btn-login {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .form-links a {
+            color: #28a745;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #aaa;
+            background: none;
+            border: none;
+        }
+
+            .close-btn:hover {
+                color: #333;
+            }
+    </style>
+}
+
+<div class="login-page-wrapper">
+    <div class="card login-card position-relative">
+        <a asp-controller="Home" asp-action="Index" class="close-btn" aria-label="Đóng">&times;</a>
+        <div class="row g-0">
+            <div class="col-lg-6 login-form-col">
+                <h3 class="fw-bold mb-3">ĐĂNG NHẬP</h3>
+                <p class="intro-text mb-4">
+                    <strong>Đặc Sản Địa Phương</strong> chào bạn! Vui lòng đăng nhập để nhận nhiều ưu đãi và trải nghiệm tốt nhất.
+                </p>
+                <form id="account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                    <div class="mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="Email hoặc số điện thoại" />
+                        <span asp-validation-for="Input.Email" class="text-danger small mt-1"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="Mật khẩu" />
+                        <span asp-validation-for="Input.Password" class="text-danger small mt-1"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-login">ĐĂNG NHẬP</button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center my-3 form-links">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Input.RememberMe" />
+                            <label class="form-check-label" asp-for="Input.RememberMe">Nhớ đăng nhập</label>
+                        </div>
+                        <a asp-page="./ForgotPassword" class="text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+
+                    <p class="text-center small form-links">
+                        Bạn chưa có tài khoản?
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-decoration-none">Đăng ký</a>
+                    </p>
+                </form>
+
+                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                {
+                    <div class="text-center my-3">
+                        <hr />
+                        <span class="px-2 small text-muted">hoặc đăng nhập bằng</span>
+                        <hr />
+                    </div>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="d-flex gap-3">
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                if (provider.Name.ToLower().Contains("facebook"))
+                                {
+                                    <button type="submit" class="btn social-login-btn flex-fill btn-facebook" name="provider" value="@provider.Name">
+                                        <i class="fab fa-facebook-f"></i> FACEBOOK
+                                    </button>
+                                }
+                                else if (provider.Name.ToLower().Contains("google"))
+                                {
+                                    <button type="submit" class="btn social-login-btn flex-fill btn-google" name="provider" value="@provider.Name">
+                                        <i class="fab fa-google"></i> GOOGLE
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </form>
+                }
+            </div>
+
+            <div class="col-lg-6 d-none d-lg-block login-image-col">
+                <h2>Mua sắm tại Đặc Sản Địa Phương</h2>
+                <p>SIÊU ƯU ĐÃI MỖI NGÀY</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,197 @@
+﻿@{
+    ViewData["Title"] = "📊 Bảng điều khiển";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">📊 Bảng điều khiển quản trị</h2>
+
+<div class="row text-center mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h6>Tổng đơn hàng</h6>
+                <h4>@ViewBag.TotalOrders</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h6>Tổng doanh thu</h6>
+                <h4>@string.Format("{0:N0} ₫", ViewBag.TotalRevenue)</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white shadow">
+            <div class="card-body">
+                <h6>Doanh thu tháng này</h6>
+                <h4>@string.Format("{0:N0} ₫", ViewBag.CurrentMonthRevenue)</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body">
+                <h6>Người dùng</h6>
+                <h4>@ViewBag.TotalUsers</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center mb-5">
+    <div class="col-md-4">
+        <div class="card bg-secondary text-white shadow">
+            <div class="card-body">
+                <h6>COD</h6>
+                <h4>@string.Format("{0:N0} ₫", ViewBag.CodRevenue)</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-dark text-white shadow">
+            <div class="card-body">
+                <h6>Chuyển khoản ngân hàng</h6>
+                <h4>@string.Format("{0:N0} ₫", ViewBag.BankRevenue)</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h6>VNPAY</h6>
+                <h4>@string.Format("{0:N0} ₫", ViewBag.VnPayRevenue)</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mt-5">
+    <div class="col-md-6 mb-4">
+        <h5>🔥 Top sản phẩm bán chạy</h5>
+        <canvas id="topProductsChart" height="300"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+        <h5>📈 Đơn hàng theo tháng</h5>
+        <canvas id="ordersChart" height="300"></canvas>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h5>📦 Đơn hàng theo trạng thái</h5>
+        <div class="d-flex justify-content-center">
+            <div style="width: 550px; height: 550px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<h4 class="mt-5">🔥 Top 5 sản phẩm bán chạy</h4>
+<table class="table table-bordered table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Hình ảnh</th>
+            <th>Sản phẩm</th>
+            <th>Số lượng đã bán</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in ViewBag.TopProductList)
+        {
+            <tr>
+                <td><img src="@item.ImageUrl" width="50" height="50" class="rounded shadow" /></td>
+                <td>
+                    <a href="@Url.Action("Display", "Product", new { area = "", id = item.ProductId })" target="_blank">
+                        @item.ProductName
+                    </a>
+                </td>
+                <td>@item.TotalSold</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <script>
+        const topProducts = @Html.Raw(ViewBag.TopProducts);
+        const ordersByMonth = @Html.Raw(ViewBag.OrdersByMonth);
+        const ordersByStatus = @Html.Raw(ViewBag.OrdersByStatus);
+
+        // Biểu đồ cột - Top sản phẩm bán chạy
+        new Chart(document.getElementById('topProductsChart'), {
+            type: 'bar',
+            data: {
+                labels: topProducts.map(p => p.ProductName),
+                datasets: [{
+                    label: 'Số lượng đã bán',
+                    data: topProducts.map(p => p.TotalSold),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Biểu đồ đường - Đơn hàng theo tháng
+        new Chart(document.getElementById('ordersChart'), {
+            type: 'line',
+            data: {
+                labels: ordersByMonth.map(m => 'Tháng ' + m.Month),
+                datasets: [{
+                    label: 'Đơn hàng',
+                    data: ordersByMonth.map(m => m.Count),
+                    borderColor: 'rgba(255, 99, 132, 0.8)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            }
+        });
+
+        // Biểu đồ tròn - Đơn hàng theo trạng thái
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ordersByStatus.map(s => s.Status),
+                datasets: [{
+                    data: ordersByStatus.map(s => s.Count),
+                    backgroundColor: ['#007bff', '#ffc107', '#dc3545', '#28a745', '#6f42c1']
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15
+                        }
+                    },
+                    datalabels: {
+                        color: '#000',
+                        formatter: (value, ctx) => {
+                            let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            let percentage = (value / total * 100).toFixed(1) + "%";
+                            return percentage;
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    </script>
+}

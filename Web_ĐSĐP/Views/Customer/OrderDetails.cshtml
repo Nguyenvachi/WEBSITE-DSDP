@@ -1,0 +1,112 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+<h2 class="mb-4 mt-3"><i class="bi bi-receipt-cutoff me-2"></i> Chi tiết đơn hàng</h2>
+
+<!-- Thông tin đơn hàng -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <strong><i class="bi bi-calendar-event me-2"></i>Ngày đặt:</strong>
+                @Model.OrderDate.ToString("dd/MM/yyyy")
+            </li>
+            <li class="list-group-item">
+                <strong><i class="bi bi-credit-card-2-front-fill me-2"></i>Phương thức thanh toán:</strong>
+                @{
+                    string methodVN = Model.PaymentMethod switch
+                    {
+                        "COD" => "Thanh toán khi nhận hàng",
+                        "VNPAY" => "Thanh toán qua VNPAY",
+                        "BankTransfer" => "Chuyển khoản ngân hàng",
+                        _ => Model.PaymentMethod
+                    };
+                }
+                @methodVN
+            </li>
+            <li class="list-group-item">
+                <strong><i class="bi bi-flag-fill me-2"></i>Trạng thái:</strong>
+                @{
+                    string statusText = Model.Status switch
+                    {
+                        "Pending" => "Chờ xác nhận",
+                        "Approved" => "Đã duyệt",
+                        "Cancelled" => "Đã hủy",
+                        _ => Model.Status
+                    };
+                    string badgeClass = Model.Status switch
+                    {
+                        "Pending" => "bg-warning text-dark",
+                        "Approved" => "bg-success",
+                        "Cancelled" => "bg-danger",
+                        _ => "bg-secondary"
+                    };
+                }
+                <span class="badge @badgeClass">@statusText</span>
+            </li>
+            <li class="list-group-item">
+                <strong><i class="bi bi-pencil-square me-2"></i>Ghi chú:</strong> @(string.IsNullOrEmpty(Model.Note) ? "Không có" : Model.Note)
+            </li>
+            <li class="list-group-item">
+                <strong><i class="bi bi-geo-alt-fill me-2"></i>Địa chỉ giao hàng:</strong>
+                @(string.IsNullOrEmpty(Model.ShippingAddress) ? "Không có" : Model.ShippingAddress)
+            </li>
+        </ul>
+    </div>
+
+    <!-- Hủy đơn -->
+    <div class="col-md-6 text-end">
+        @if (Model.Status == "Pending")
+        {
+            <form asp-action="CancelOrder" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-danger mt-2">
+                    <i class="bi bi-x-circle"></i> Hủy đơn hàng
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<!-- Danh sách sản phẩm -->
+<h4 class="mb-3"><i class="bi bi-box-seam me-2"></i>Danh sách sản phẩm</h4>
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Size</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Tổng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr class="text-center">
+                <td><img src="@item.ImageUrl" class="img-thumbnail" width="60" /></td>
+                <td class="text-start fw-semibold">
+                    <a asp-controller="Product" asp-action="Display" asp-route-id="@item.ProductId" class="text-decoration-none">
+                        @item.ProductName
+                    </a>
+                </td>
+                <td>@item.Unit</td>
+                <td>@item.Price.ToString("N0") đ</td>
+                <td>@item.Quantity</td>
+                <td class="fw-bold">@item.Total.ToString("N0") đ</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Tổng tiền -->
+<h5 class="text-end mt-4">
+    <span class="text-muted">Tổng tiền:</span>
+    <span class="fw-bold text-success">@Model.TotalAmount.ToString("N0") đ</span>
+</h5>

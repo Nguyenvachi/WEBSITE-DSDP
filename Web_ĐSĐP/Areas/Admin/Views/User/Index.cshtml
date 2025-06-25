@@ -1,0 +1,56 @@
+﻿@using E_Sport.Models
+@model IEnumerable<ApplicationUser>
+
+@{
+    ViewData["Title"] = "📋 Quản lý người dùng";
+    var rolesPerUser = ViewBag.RolesPerUser as Dictionary<string, string>;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">➕ Thêm người dùng</a>
+
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>SDT</th>
+            <th>Vai trò</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            var currentRole = rolesPerUser[user.Id];
+            <tr>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.PhoneNumber</td>
+                <td>
+                    <span class="badge bg-@(currentRole == "Admin" ? "primary" : currentRole == "Employee" ? "info text-dark" : "secondary")">
+                        @currentRole
+                    </span>
+                </td>
+                <td>
+                    @if (currentRole == "Customer")
+                    {
+                        <form asp-action="PromoteToEmployee" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Nâng cấp</button>
+                        </form>
+                    }
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-info btn-sm">Chi tiết</a>
+
+                    <form asp-action="Delete" method="post" class="d-inline ms-1">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

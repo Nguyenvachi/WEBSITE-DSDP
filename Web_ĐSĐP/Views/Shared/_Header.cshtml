@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using E_Sport.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!-- Header top -->
+<div class="header-top">
+	<div class="container">
+		<div class="hotline">
+			HOTLINE <span class="highlight">028 7770 2614</span>
+		</div>
+		<div class="top-links">
+			<a href="#"><i class="fa-solid fa-download"></i> Tải ứng dụng</a>
+			<a href="#"><i class="fa-solid fa-share-nodes"></i> Dành cho Cộng tác viên</a>
+		</div>
+	</div>
+</div>
+
+<!-- Header main -->
+<div class="header-main">
+	<div class="container d-flex align-items-center justify-content-between">
+		<a href="/" class="logo d-flex align-items-center gap-2">
+			<img src="/images/logo.png" style="height:38px;width:38px;" alt="Logo" />
+			<span class="fw-bold fs-5">Đặc Sản Địa Phương</span>
+		</a>
+
+		<form class="search-bar" action="/tim-kiem" method="get">
+			<input type="text" placeholder="Nhập nội dung tìm kiếm..." name="q" />
+			<button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+		</form>
+
+        <div class="header-actions d-flex align-items-center gap-3">
+            <a href="#"><i class="fa-solid fa-bell"></i> Thông báo của tôi</a>
+
+            @if (SignInManager.IsSignedIn(User))
+            {
+                var user = await UserManager.GetUserAsync(User);
+                var roles = await UserManager.GetRolesAsync(user);
+                var isStaff = roles.Contains("Admin") || roles.Contains("Employee");
+
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-1 text-white"
+                       href="#" id="userDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user"></i>
+                        <span>@user.FullName</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item text-dark" href="/Identity/Account/Manage">Thông tin tài khoản</a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item text-dark">Đăng xuất</button>
+                            </form>
+                        </li>
+                        @if (roles.Contains("Admin"))
+                        {
+                            <li>
+                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="dropdown-item text-dark">
+                                    ⬅️ Về Admin
+                                </a>
+                            </li>
+                        }
+                        else if (roles.Contains("Employee"))
+                        {
+                            <li>
+                                <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="dropdown-item text-dark">
+                                    ⬅️ Về Employee
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <a href="/Identity/Account/Login"><i class="fa-solid fa-user"></i> Đăng nhập</a>
+                <a href="/Identity/Account/Register"><i class="fa-solid fa-user-plus"></i> Đăng ký</a>
+            }
+
+            <a href="#"><i class="fa-solid fa-store"></i> Giao hàng từ kho: <span class="highlight">Tân Phú</span></a>
+            <a href="/Cart"><i class="fa-solid fa-cart-shopping"></i></a>
+        </div>
+
+	</div>
+</div>
+
+<!-- Main Menu -->
+<nav class="main-menu">
+	<ul class="menu-list">
+		<li><a href="#"><i class="fa-solid fa-bars"></i> DANH MỤC SẢN PHẨM</a></li>
+		<li class="sale"><a href="#"><i class="fa-solid fa-bolt"></i> SALE ĐẾN 50%</a></li>
+		<li><a href="#"><i class="fa-solid fa-shop"></i> ĐI CHỢ ONLINE</a></li>
+		<li><a href="#"><i class="fa-solid fa-apple-whole"></i> TRÁI CÂY</a></li>
+		<li><a href="#"><i class="fa-solid fa-mug-hot"></i> TRÀ - CÀ PHÊ</a></li>
+		<li><a href="#"><i class="fa-solid fa-star"></i> ĐẶC SẢN</a></li>
+		<li><a href="#"><i class="fa-solid fa-tractor"></i> AGRISHOW</a></li>
+		<li><a href="#"><i class="fa-solid fa-leaf"></i> MY FARM</a></li>
+	</ul>
+</nav>
+
+

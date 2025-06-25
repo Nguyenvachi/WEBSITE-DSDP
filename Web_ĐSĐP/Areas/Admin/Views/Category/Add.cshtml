@@ -1,0 +1,86 @@
+﻿@model E_Sport.Models.Category
+@{
+    ViewData["Title"] = "Thêm Danh mục mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <form asp-area="Admin" asp-controller="Category" asp-action="Add" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Ví dụ: Đặc Sản Khô, Trái Cây Miền Tây..." />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="ParentCategoryId" class="form-label fw-semibold"></label>
+                            <select asp-for="ParentCategoryId" asp-items="@ViewBag.ParentCategories" class="form-select">
+                                <option value="">-- Là danh mục gốc --</option>
+                            </select>
+                            <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DisplayOrder" class="form-label fw-semibold"></label>
+                            <input asp-for="DisplayOrder" type="number" class="form-control" value="0" />
+                            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check form-switch mt-4">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="IconCssClass" class="form-label fw-semibold"></label>
+                        <input asp-for="IconCssClass" class="form-control" placeholder="Ví dụ: fas fa-leaf, fas fa-fish..." />
+                        <span asp-validation-for="IconCssClass" class="text-danger"></span>
+                        <small class="form-text text-muted">Sử dụng class từ <a href="https://fontawesome.com/v5/search?m=free" target="_blank">Font Awesome 5</a>.</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="imageUrlFile" class="form-label fw-semibold">Hình ảnh đại diện</label>
+                        <input type="file" name="imageUrlFile" id="imageUrlFile" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-save me-1"></i> Lưu Danh mục
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

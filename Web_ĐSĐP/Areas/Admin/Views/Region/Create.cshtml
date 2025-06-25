@@ -1,0 +1,68 @@
+﻿@model E_Sport.Models.Region
+@{
+    ViewData["Title"] = "Thêm Vùng miền / Xuất xứ mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Ví dụ: Hà Giang, Bến Tre, Phú Quốc..." />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Mô tả ngắn về đặc điểm của vùng miền này..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imageUrlFile" class="form-label fw-semibold">Hình ảnh đại diện</label>
+                            <input type="file" name="imageUrlFile" id="imageUrlFile" class="form-control" />
+                            <small class="form-text text-muted">Chọn một ảnh đại diện cho vùng miền (nếu có).</small>
+                        </div>
+
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded border">
+                            <h6 class="fw-bold">Cấu hình hiển thị</h6>
+                            <hr />
+                            <div class="form-check form-switch mt-3">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="form-check-label">Hiển thị vùng miền này?</label>
+                                <small class="form-text text-muted d-block">Bỏ chọn nếu bạn muốn tạm ẩn vùng miền này khỏi các bộ lọc.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-save me-1"></i> Thêm mới
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

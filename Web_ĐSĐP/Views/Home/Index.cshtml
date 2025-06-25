@@ -1,0 +1,89 @@
+﻿@model E_Sport.Models.ViewModels.ProductFilterViewModel
+@{
+    ViewData["Title"] = "   Tinh hoa Đặc Sản Việt";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+
+    // Xác định giá trị selected cho từng option
+    var selNewest    = (Model.CurrentSortBy == "newest"    || string.IsNullOrEmpty(Model.CurrentSortBy)) ? " selected" : "";
+    var selPriceAsc  = Model.CurrentSortBy == "price_asc"  ? " selected" : "";
+    var selPriceDesc = Model.CurrentSortBy == "price_desc" ? " selected" : "";
+    var selNameAsc   = Model.CurrentSortBy == "name_asc"   ? " selected" : "";
+    var selNameDesc  = Model.CurrentSortBy == "name_desc"  ? " selected" : "";
+}
+
+<div class="container-xxl my-4 body-container">
+    <!-- SIDEBAR FILTER -->
+    <aside class="product-filter">
+        @await Html.PartialAsync("_ProductFilterSidebar", Model)
+    </aside>
+
+    <!-- MAIN PRODUCT LISTING -->
+    <section class="product-listing bg-white rounded-4 shadow-sm p-4">
+        <div class="header mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2 class="fw-bold text-success m-0">Sản phẩm từ quê nhà</h2>
+            <select id="sort-by" name="sortBy" class="form-select form-select-sm w-auto filter-trigger">
+                @* Mới nhất *@
+                @if (Model.CurrentSortBy == "newest" || string.IsNullOrEmpty(Model.CurrentSortBy))
+                {
+                    <option value="newest" selected>Mới nhất</option>
+                }
+                else
+                {
+                    <option value="newest">Mới nhất</option>
+                }
+
+                @* Giá: Thấp → Cao *@
+                @if (Model.CurrentSortBy == "price_asc")
+                {
+                    <option value="price_asc" selected>Giá: Thấp đến Cao</option>
+                }
+                else
+                {
+                    <option value="price_asc">Giá: Thấp đến Cao</option>
+                }
+
+                @* Giá: Cao → Thấp *@
+                @if (Model.CurrentSortBy == "price_desc")
+                {
+                    <option value="price_desc" selected>Giá: Cao đến Thấp</option>
+                }
+                else
+                {
+                    <option value="price_desc">Giá: Cao đến Thấp</option>
+                }
+
+                @* Tên: A–Z *@
+                @if (Model.CurrentSortBy == "name_asc")
+                {
+                    <option value="name_asc" selected>Tên: A–Z</option>
+                }
+                else
+                {
+                    <option value="name_asc">Tên: A–Z</option>
+                }
+
+                @* Tên: Z–A *@
+                @if (Model.CurrentSortBy == "name_desc")
+                {
+                    <option value="name_desc" selected>Tên: Z–A</option>
+                }
+                else
+                {
+                    <option value="name_desc">Tên: Z–A</option>
+                }
+            </select>
+
+        </div>
+
+        <div id="loading" class="text-center my-3 d-none">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải sản phẩm...</p>
+        </div>
+
+        <div id="ajax-product-list" class="product-grid">
+            @await Html.PartialAsync("~/Views/Product/_ProductListPartial.cshtml", Model.Products)
+        </div>
+    </section>
+</div>

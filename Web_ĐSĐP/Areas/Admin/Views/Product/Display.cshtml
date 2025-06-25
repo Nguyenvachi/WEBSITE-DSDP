@@ -1,0 +1,175 @@
+﻿@model E_Sport.Models.Product
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm: " + Model.Name;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-eye me-2"></i>@ViewData["Title"]</h4>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light btn-sm me-2">
+                    <i class="fas fa-edit me-1"></i> Sửa
+                </a>
+                <a asp-action="Index" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Cột Ảnh Sản phẩm -->
+                <div class="col-md-5 mb-4 mb-md-0">
+                    <h5 class="text-primary fw-semibold mb-3">Hình ảnh sản phẩm</h5>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-3 text-center">
+                            <img src="@Url.Content(Model.ImageUrl)" class="img-fluid rounded shadow-sm" style="max-height: 350px; border: 1px solid #ddd;" alt="Ảnh đại diện - @Model.Name"
+                                 onerror="this.onerror=null;this.src='/images/placeholder-image.png';" />
+                            <p class="text-muted mt-2"><small>Ảnh đại diện</small></p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3 text-center">
+                            <img src="/images/placeholder-image.png" class="img-fluid rounded shadow-sm" style="max-height: 350px; border: 1px solid #ddd;" alt="Không có ảnh đại diện" />
+                            <p class="text-muted mt-2"><small>Không có ảnh đại diện</small></p>
+                        </div>
+                    }
+
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <hr />
+                        <h6 class="text-secondary fw-semibold mb-2">Ảnh chi tiết khác:</h6>
+                        <div class="d-flex flex-wrap" style="gap: 10px;">
+                            @foreach (var img in Model.Images)
+                            {
+                                <a href="@Url.Content(img.Url)" data-bs-toggle="tooltip" title="Xem ảnh lớn">
+                                    <img src="@Url.Content(img.Url)" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" alt="Ảnh chi tiết"
+                                         onerror="this.onerror=null;this.src='/images/placeholder-image.png';" />
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Cột Thông tin chi tiết Sản phẩm -->
+                <div class="col-md-7">
+                    <h3 class="text-primary fw-bold mb-3">@Model.Name</h3>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">ID Sản phẩm:</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">Giá bán:</dt>
+                        <dd class="col-sm-8"><strong class="text-danger fs-5">@Model.Price.ToString("N0") ₫</strong></dd>
+
+                        <dt class="col-sm-4">Danh mục:</dt>
+                        <dd class="col-sm-8">@Model.Category?.Name</dd>
+
+                        <dt class="col-sm-4">Xuất xứ/Vùng miền:</dt>
+                        <dd class="col-sm-8">@Model.Region?.Name</dd>
+
+                        @if (!string.IsNullOrEmpty(Model.Unit))
+                        {
+                            <dt class="col-sm-4">Đơn vị tính:</dt>
+                            <dd class="col-sm-8">@Model.Unit</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Weight))
+                        {
+                            <dt class="col-sm-4">Trọng lượng/Quy cách:</dt>
+                            <dd class="col-sm-8">@Model.Weight</dd>
+                        }
+
+                        <dt class="col-sm-4">Số lượng tồn kho:</dt>
+                        <dd class="col-sm-8">@Model.StockQuantity</dd>
+
+                        @if (Model.ExpiryDate.HasValue)
+                        {
+                            <dt class="col-sm-4">Hạn sử dụng:</dt>
+                            <dd class="col-sm-8">@Model.ExpiryDate.Value.ToString("dd/MM/yyyy")</dd>
+                        }
+
+                        <dt class="col-sm-4">Thực phẩm tươi:</dt>
+                        <dd class="col-sm-8">@(Model.IsFreshFood ? "Có" : "Không")</dd>
+
+                        <dt class="col-sm-4">Trạng thái hiển thị:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Đang ẩn</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Sản phẩm nổi bật:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsFeatured)
+                            {
+                                <span class="badge bg-warning text-dark">Có</span>
+                            }
+                            else
+                            {
+                                <span>Không</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Lượt xem:</dt>
+                        <dd class="col-sm-8">@Model.ViewCount</dd>
+
+                        <dt class="col-sm-4">Ngày tạo:</dt>
+                        <dd class="col-sm-8">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        @if (Model.UpdatedDate.HasValue)
+                        {
+                            <dt class="col-sm-4">Ngày cập nhật:</dt>
+                            <dd class="col-sm-8">@Model.UpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <h5 class="text-primary fw-semibold mb-2">📝 Mô tả sản phẩm</h5>
+                <div class="p-3 bg-light border rounded mb-4">
+                    @Html.Raw(Model.Description)
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Ingredients))
+            {
+                <h5 class="text-primary fw-semibold mb-2">🌿 Thành phần</h5>
+                <div class="p-3 bg-light border rounded mb-4">
+                    <p>@Html.Raw(Model.Ingredients.Replace("\n", "<br />"))</p>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.StorageInstructions))
+            {
+                <h5 class="text-primary fw-semibold mb-2">🧊 Hướng dẫn bảo quản</h5>
+                <div class="p-3 bg-light border rounded">
+                    <p>@Html.Raw(Model.StorageInstructions.Replace("\n", "<br />"))</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Kích hoạt tooltip nếu bạn dùng (cho ảnh chi tiết)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}
+

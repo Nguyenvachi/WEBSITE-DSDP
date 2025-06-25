@@ -1,0 +1,54 @@
+﻿@* File: _CategoryRow.cshtml *@
+@model E_Sport.Models.Category
+
+@{
+    // Nhận cấp độ thụt lề từ ViewData
+    int level = ViewData["Level"] as int? ?? 0;
+    var indentation = string.Concat(Enumerable.Repeat("— ", level));
+}
+
+<tr class="align-middle">
+    <td>@Model.Id</td>
+    <td>
+        <div style="padding-left: @(level * 25)px;">
+            @indentation
+            @if (!string.IsNullOrEmpty(Model.IconCssClass))
+            {
+                <i class="@Model.IconCssClass me-2 text-primary"></i>
+            }
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="fw-semibold text-decoration-none">@Model.Name</a>
+        </div>
+    </td>
+    <td>@Model.ParentCategory?.Name</td>
+    <td class="text-center">@(Model.Products?.Count ?? 0)</td>
+    <td class="text-center">@Model.DisplayOrder</td>
+    <td class="text-center">
+        @if (Model.IsActive)
+        {
+            <span class="badge bg-success">Hoạt động</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary">Ẩn</span>
+        }
+    </td>
+    <td class="text-center">
+        <div class="btn-group" role="group">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning btn-sm" title="Sửa">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục \'@Model.Name.Replace("'", "\\'")\' không?');">
+                <i class="fas fa-trash-alt"></i>
+            </a>
+        </div>
+    </td>
+</tr>
+
+@* Phần đệ quy: Nếu có danh mục con, gọi lại chính Partial View này cho mỗi danh mục con *@
+@if (Model.SubCategories != null && Model.SubCategories.Any())
+{
+    foreach (var subCategory in Model.SubCategories.OrderBy(c => c.DisplayOrder).ThenBy(c => c.Name))
+    {
+        <partial name="_CategoryRow" model="subCategory" view-data='new ViewDataDictionary(ViewData) { { "Level", level + 1 } }' />
+    }
+}

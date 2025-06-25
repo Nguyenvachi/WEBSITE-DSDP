@@ -1,0 +1,49 @@
+﻿@* @model E_Sport.Models.Review
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+            @Model.ReviewerName – @Model.CreatedAt.ToLocalTime():00
+            <span class="float-end">@for (int i = 0; i < Model.Rating; i++)
+                {
+                    <i class="fas fa-star text-warning"></i>
+                }</span>
+        </h6>
+        <p class="card-text">@Model.Comment</p>
+    </div>
+</div>
+ *@
+
+
+
+ @model E_Sport.Models.Review
+
+<div class="review-item card mb-3 shadow-sm border-0">
+    <div class="card-body d-flex align-items-start gap-3">
+        <div class="avatar rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
+            <span class="fw-bold fs-4 text-primary">
+                @Model.ReviewerName?.Substring(0, 1).ToUpper()
+            </span>
+        </div>
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-1">
+                <span class="fw-bold">@Model.ReviewerName</span>
+                <span class="mx-2 text-muted small">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                <span>
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= Model.Rating)
+                        {
+                            <i class="fas fa-star text-warning"></i>
+                        }
+                        else
+                        {
+                            <i class="far fa-star text-warning"></i>
+                        }
+                    }
+                </span>
+            </div>
+            <div class="review-content">@Model.Comment</div>
+        </div>
+    </div>
+</div>

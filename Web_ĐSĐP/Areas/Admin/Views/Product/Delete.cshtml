@@ -1,0 +1,43 @@
+﻿@model E_Sport.Models.Product
+@{
+    ViewData["Title"] = "Xác nhận xóa";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger fw-bold mb-4">⚠️ Xác nhận xóa sản phẩm</h2>
+
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="@Model.ImageUrl" class="img-fluid rounded shadow" style="max-height: 250px;" />
+        </div>
+
+        <div class="col-md-8">
+            <div class="alert alert-danger" role="alert">
+                <strong>Bạn có chắc chắn muốn xóa sản phẩm sau không?</strong>
+                <ul class="mt-2">
+                    <li><strong>Tên:</strong> @Model.Name</li>
+                    <li><strong>Giá:</strong> @Model.Price.ToString("N0") ₫</li>
+                    <li><strong>Loại:</strong> @Model.Category?.Name</li>
+                </ul>
+                <p class="text-danger fw-semibold">Hành động này không thể hoàn tác!</p>
+            </div>
+            <form asp-action="Delete" method="post" id="deleteForm">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-danger" id="btnDelete">🗑️ Xóa</button>
+                <a asp-action="Index" class="btn btn-secondary">↩️ Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.getElementById("deleteForm").addEventListener("submit", function (e) {
+            const confirmed = confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+            if (!confirmed) {
+                e.preventDefault(); // Hủy gửi form nếu người dùng nhấn Cancel
+            }
+        });
+    </script>
+}
+

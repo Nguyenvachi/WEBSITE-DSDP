@@ -1,0 +1,64 @@
+﻿@model List<E_Sport.Models.Product>
+
+@{
+    ViewData["Title"] = "❤️ Sản phẩm yêu thích";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+<h2 class="text-danger fw-bold mb-4 text-center"><i class="bi bi-heart-fill"></i> Sản phẩm yêu thích</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle-fill"></i> Bạn chưa thêm sản phẩm nào vào danh sách yêu thích.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col" id="fav-card-@product.Id">
+                <div class="card h-100 shadow-sm">
+                    <img src="@product.ImageUrl" class="card-img-top" style="height: 220px; object-fit: cover" />
+                    <div class="card-body">
+                        <h5 class="card-title text-dark fw-semibold">@product.Name</h5>
+                        <p class="text-danger fw-bold">@product.Price.ToString("N0") đ</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <a href="@Url.Action("Display", "Product", new { id = product.Id })" class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye"></i> Xem chi tiết
+                        </a>
+                        <button data-product-id="@product.Id" class="btn btn-outline-danger btn-sm toggle-favorite">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.toggle-favorite').click(function () {
+                const button = $(this);
+                const productId = button.data('product-id');
+
+                $.post('/Favorite/Toggle', { productId: productId }, function (result) {
+                    if (result.favorited === false) {
+                        // Xóa khỏi danh sách và báo toastr
+                        $('#fav-card-' + productId).fadeOut(300, function () { $(this).remove(); });
+                        toastr.info("Đã xóa khỏi yêu thích!");
+                    } else {
+                        toastr.success("Đã thêm vào yêu thích!");
+                        // Không cần reload vì sản phẩm đã hiển thị rồi
+                    }
+                }).fail(function () {
+                    toastr.error("Lỗi khi xử lý yêu thích!");
+                });
+            });
+        });
+    </script>
+}

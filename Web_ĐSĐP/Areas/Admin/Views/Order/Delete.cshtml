@@ -1,0 +1,21 @@
+﻿@model E_Sport.Models.Order
+@{
+    ViewData["Title"] = "Xóa đơn hàng";
+}
+
+
+<h2>Bạn có chắc muốn xóa đơn hàng này?</h2>
+
+<div>
+    <p><strong>Người đặt:</strong> @Model.User.FullName</p>
+    <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy")</p>
+    <p><strong>Tổng tiền:</strong> @Model.TotalAmount.ToString("N0") VNĐ</p>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <p>Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+
+</div>

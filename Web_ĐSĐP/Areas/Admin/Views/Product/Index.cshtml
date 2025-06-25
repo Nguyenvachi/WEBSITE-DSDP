@@ -1,0 +1,139 @@
+﻿@model IEnumerable<E_Sport.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm Đặc Sản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml"; // Đảm bảo layout này đúng
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-gifts me-2"></i>@ViewData["Title"]</h4>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Add" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle me-1"></i> Thêm Sản phẩm mới
+            </a>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">Chưa có sản phẩm nào. Hãy <a asp-action="Add">thêm sản phẩm mới</a>.</div>
+            }
+            else
+            {
+                <table id="productTable" class="table table-hover table-bordered table-striped align-middle" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Ảnh</th>
+                            <th>Tên Sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Danh mục</th>
+                            <th>Xuất xứ/Vùng miền</th>
+                            <th>ĐVT</th>
+                            <th>Tồn kho</th>
+                            <th>Nổi bật</th>
+                            <th>Trạng thái</th>
+                            <th style="width: 150px;">Chức năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>@product.Id</td>
+                                <td>
+                                    <img src="@Url.Content(product.ImageUrl ?? "/images/placeholder-image.png")" alt="@product.Name" class="img-thumbnail" style="width: 70px; height: 70px; object-fit: cover;"
+                                         onerror="this.onerror=null;this.src='/images/placeholder-image.png';" />
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@product.Id" class="fw-semibold text-decoration-none">@product.Name</a>
+                                </td>
+                                <td class="text-end">@product.Price.ToString("N0") ₫</td>
+                                <td>@product.Category?.Name</td>
+                                <td>@product.Region?.Name</td> @* Sử dụng Region.Name *@
+                                <td>@product.Unit</td>
+                                <td class="text-center">@product.StockQuantity</td>
+                                <td class="text-center">
+                                    @if (product.IsFeatured)
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> Có</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (product.IsActive)
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Ẩn</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-outline-warning btn-sm" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @* Nút Xem chi tiết có thể dẫn đến trang Display của Admin hoặc trang chi tiết của User *@
+                                        <a asp-controller="Product" asp-action="Display" asp-route-id="@product.Id" asp-area="" target="_blank" class="btn btn-outline-info btn-sm" title="Xem trên web">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-outline-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- jQuery (đảm bảo đã có ở _AdminLayout.cshtml hoặc ở đây) -->
+@* <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> *@
+    <!-- DataTables CSS (đảm bảo đã có ở _AdminLayout.cshtml hoặc ở đây) -->
+@* <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" /> *@
+    <!-- DataTables JS (đảm bảo đã có ở _AdminLayout.cshtml hoặc ở đây) -->
+@* <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> *@
+
+    <script>
+        $(document).ready(function () {
+            $('#productTable').DataTable({
+                "language": {
+                    "search": "🔎 Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ sản phẩm",
+                    "info": "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ sản phẩm",
+                    "infoEmpty": "Không có sản phẩm nào để hiển thị",
+                    "infoFiltered": "(được lọc từ _MAX_ tổng số sản phẩm)",
+                    "zeroRecords": "Không tìm thấy sản phẩm nào phù hợp",
+                    "paginate": {
+                        "first": "<<",
+                        "last": ">>",
+                        "next": ">",
+                        "previous": "<"
+                    },
+                    "aria": {
+                        "sortAscending": ": kích hoạt để sắp xếp cột tăng dần",
+                        "sortDescending": ": kích hoạt để sắp xếp cột giảm dần"
+                    }
+                },
+                "pageLength": 10, // Số sản phẩm hiển thị mỗi trang
+                "lengthMenu": [5, 10, 20, 50, 100],
+                "order": [[2, "asc"]], // Mặc định sắp xếp theo cột "Tên Sản phẩm" (cột thứ 3, index là 2)
+                "columnDefs": [
+                    { "orderable": false, "targets": [1, 10] }, // Không cho sắp xếp cột Ảnh và Chức năng (index 1 và 10)
+                    { "searchable": false, "targets": [1, 7, 8, 9, 10] } // Không tìm kiếm ở cột Ảnh, Tồn kho, Nổi bật, Trạng thái, Chức năng
+                ],
+                "responsive": true, // Cho phép bảng co giãn trên thiết bị nhỏ
+                "autoWidth": false  // Tắt tự động tính chiều rộng cột
+            });
+        });
+    </script>
+}

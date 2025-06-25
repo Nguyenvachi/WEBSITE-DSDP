@@ -1,0 +1,69 @@
+﻿@model IEnumerable<E_Sport.Models.Category>
+@{
+    ViewData["Title"] = "Quản lý Danh mục Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-sitemap me-2"></i>@ViewData["Title"]</h4>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Add" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle me-1"></i> Thêm Danh mục mới
+            </a>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">Chưa có danh mục nào. Hãy <a asp-action="Add">thêm danh mục mới</a>.</div>
+            }
+            else
+            {
+                <table id="categoryTable" class="table table-hover table-bordered" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên danh mục</th>
+                            <th>Danh mục cha</th>
+                            <th>Số SP</th>
+                            <th>Thứ tự</th>
+                            <th>Trạng thái</th>
+                            <th style="width: 100px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            // Lấy các danh mục gốc (không có cha) để bắt đầu render
+                            var rootCategories = Model.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ThenBy(c => c.Name);
+                        }
+                        @foreach (var category in rootCategories)
+                        {
+                            // Gọi Partial View đệ quy cho từng danh mục gốc với cấp độ ban đầu là 0
+                            <partial name="_CategoryRow" model="category" view-data='new ViewDataDictionary(ViewData) { { "Level", 0 } }' />
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Tạm thời không dùng DataTables để hiển thị cấu trúc cây một cách tự nhiên nhất
+            // Nếu bạn muốn dùng, hãy bỏ comment phần dưới và cấu hình cho phù hợp
+            /*
+            $('#categoryTable').DataTable({
+                "language": {
+                    // ... các cấu hình ngôn ngữ ...
+                },
+                "paging": false, // Tắt phân trang để giữ cấu trúc cây
+                "info": false,
+                "ordering": false // Tắt sắp xếp để giữ cấu trúc cây
+            });
+            */
+        });
+    </script>
+}

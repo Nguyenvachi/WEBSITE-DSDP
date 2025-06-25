@@ -1,0 +1,84 @@
+﻿@model E_Sport.Models.Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công!";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0" style="border-radius: 15px;">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="success-icon mb-4">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+
+                    <h1 class="h2 fw-bold text-success">Cảm ơn bạn đã đặt hàng!</h1>
+                    <p class="lead text-muted">Đơn hàng của bạn đã được tiếp nhận và sẽ được xử lý trong thời gian sớm nhất.</p>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-info">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <div class="order-summary-box my-4 p-4 bg-light rounded border">
+                        <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
+                        <dl class="row text-start">
+                            <dt class="col-sm-5">Mã đơn hàng:</dt>
+                            <dd class="col-sm-7 fw-bold text-primary">#@Model.Id</dd>
+
+                            <dt class="col-sm-5">Ngày đặt:</dt>
+                            <dd class="col-sm-7">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                            <dt class="col-sm-5">Tên người nhận:</dt>
+                            <dd class="col-sm-7">@Model.FullName</dd>
+
+                            <dt class="col-sm-5">Địa chỉ giao hàng:</dt>
+                            <dd class="col-sm-7">@Model.ShippingAddress</dd>
+
+                            <dt class="col-sm-5">Tổng số tiền:</dt>
+                            <dd class="col-sm-7 fw-bold text-danger fs-5">@Model.TotalAmount.ToString("N0") ₫</dd>
+                        </dl>
+                        <a asp-action="OrderDetails" asp-controller="Customer" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary mt-2">Xem chi tiết đơn hàng</a>
+                    </div>
+
+                    <p>Một email xác nhận đã được gửi đến <strong>@Model.UserEmail</strong>. Vui lòng kiểm tra hộp thư của bạn.</p>
+                    <p class="text-muted">Nếu có bất kỳ thắc mắc nào, đừng ngần ngại liên hệ với chúng tôi qua hotline.</p>
+
+                    <div class="mt-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg me-2 mb-2">
+                            <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+                        </a>
+                        <a asp-controller="Customer" asp-action="OrderHistory" class="btn btn-outline-secondary btn-lg mb-2">
+                            <i class="fas fa-history me-2"></i>Xem lịch sử mua hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .success-icon {
+            font-size: 5rem;
+            color: var(--bs-success);
+        }
+
+        .order-summary-box {
+            background-color: #f8f9fa !important;
+        }
+
+            .order-summary-box dt {
+                font-weight: 500;
+                color: #6c757d;
+            }
+
+            .order-summary-box dd {
+                font-weight: 600;
+                color: #212529;
+            }
+    </style>
+}

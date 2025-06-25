@@ -1,0 +1,197 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using E_Sport.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@model List<E_Sport.Models.CartItem>
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+<div class="container py-5">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <img src="~/images/logi.png" alt="Giỏ hàng trống" class="mb-3" style="max-width:250px;" />
+            <h4>Giỏ hàng của bạn đang trống!</h4>
+            <p class="text-muted">Hãy quay lại và chọn những món đặc sản tuyệt vời nhé.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success mt-3">
+                <i class="fas fa-store me-2"></i> Tiếp tục mua sắm
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <!-- Header: Continue, Select All, Delete -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-3 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-success me-4 mb-0">
+                                    <i class="fas fa-arrow-left me-2"></i> TIẾP TỤC MUA SẮM
+                                </a>
+                                <div class="form-check mb-0">
+                                    <input id="selectAll" class="form-check-input me-2" type="checkbox" />
+                                    <label class="form-check-label" for="selectAll">Chọn tất cả (@Model.Count sản phẩm)</label>
+                                </div>
+                            </div>
+                            <button id="delete-selected" class="btn btn-link text-danger mb-0" disabled>
+                                <i class="fas fa-trash-alt"></i> Xóa
+                            </button>
+                        </div>
+
+                        <!-- Columns Header on Desktop -->
+                        <div class="row d-none d-lg-flex fw-bold text-uppercase border-bottom p-3 text-muted small">
+                            <div class="col-lg-6">Sản phẩm</div>
+                            <div class="col-lg-2 text-center pe-lg-5">Đơn giá</div>
+                            <div class="col-lg-2 text-center pe-lg-5">Số lượng</div>
+                            <div class="col-lg-2 text-end pe-lg-5">Thành tiền</div>
+                        </div>
+
+                        <div id="cart-items-container">
+                            @foreach (var item in Model)
+                            {
+                                <div id="cart-row-@item.ProductId" class="row align-items-center border-bottom py-3 px-3 cart-item-row">
+                                    <div class="col-12 col-lg-6 d-flex align-items-center mb-3 mb-lg-0">
+                                        <input type="checkbox" class="form-check-input me-3 row-select" />
+                                        <img src="@Url.Content(item.ImageUrl ?? "~/images/placeholder-image.png")" alt="@item.ProductName"
+                                             class="rounded me-3" style="width:80px;height:80px;object-fit:cover;" />
+                                        <div>
+                                            <a asp-controller="Product" asp-action="Display" asp-route-id="@item.ProductId"
+                                               class="fw-semibold text-decoration-none text-dark product-name-link">
+                                                @item.ProductName
+                                            </a>
+                                            @if (!string.IsNullOrEmpty(item.Unit))
+                                            {
+                                                <small class="text-muted d-block">Đơn vị: @item.Unit</small>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Giá + nút Yêu thích & Xóa -->
+                                    <div class="col-12 col-lg-2 text-center pe-lg-5 mb-3 mb-lg-0">
+                                        <span class="text-danger fw-bold">@item.Price.ToString("N0") ₫</span>
+                                        <div class="mt-2 d-flex justify-content-center gap-2">
+                                            <button class="btn btn-outline-secondary btn-sm btn-wishlist" data-id="@item.ProductId" title="Yêu thích">
+                                                <i class="fas fa-heart"></i>
+                                            </button>
+                                            <button class="btn btn-link p-0 text-danger btn-remove-item" data-id="@item.ProductId" title="Xóa">
+                                                <i class="fas fa-trash-alt fa-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Số lượng -->
+                                    <div class="col-6 col-lg-2 text-center pe-lg-5">
+                                        <div class="input-group input-group-sm justify-content-center" style="max-width:120px; margin:auto;">
+                                            <button class="btn btn-outline-secondary btn-quantity-change" type="button" data-id="@item.ProductId" data-change="-1">-</button>
+                                            <input type="text" readonly class="form-control text-center quantity-input" value="@item.Quantity" data-id="@item.ProductId" />
+                                            <button class="btn btn-outline-secondary btn-quantity-change" type="button" data-id="@item.ProductId" data-change="1">+</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thành tiền -->
+                                    <div class="col-6 col-lg-2 text-end pe-lg-5">
+                                        <span id="item-total-@item.ProductId" class="fw-bold text-danger item-total">@item.Total.ToString("N0") ₫</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Tổng kết -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 sticky-top" style="top:100px;">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Tóm tắt đơn hàng</h4>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tạm tính</span>
+                            <span id="sub-total" class="fw-semibold">0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Phí vận chuyển</span>
+                            <span class="fw-semibold">Tính khi thanh toán</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between fs-5 fw-bold">
+                            <span>Tổng cộng</span>
+                            <span id="grand-total" class="text-danger">0 ₫</span>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <a asp-controller="Order" asp-action="Checkout" id="checkout-btn" class="btn btn-success btn-lg fw-bold disabled" role="button">Tiến hành Thanh toán <i class="fas fa-long-arrow-alt-right ms-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            const fmt = num => num.toLocaleString('vi-VN');
+            function recalc(){
+                let sum=0;
+                $('.row-select:checked').each(function(){
+                    sum+=parseInt($(this).closest('.cart-item-row')
+                        .find('.item-total').text().replace(/[₫\s\.]/g,''))||0;
+                });
+                $('#sub-total').text(fmt(sum)+' ₫');
+                $('#grand-total').text(fmt(sum)+' ₫');
+                // Toggle checkout link
+                if(sum>0) $('#checkout-btn').removeClass('disabled');
+                else $('#checkout-btn').addClass('disabled');
+                // Toggle delete-selected
+                $('#delete-selected').prop('disabled',$('.row-select:checked').length===0);
+            }
+            $('#selectAll').change(function(){ $('.row-select').prop('checked',this.checked); recalc(); });
+            $(document).on('change','.row-select',recalc);
+
+            function upd(id,qty){
+                const r=$('#cart-row-'+id); r.addClass('opacity-50');
+                $.post('@Url.Action("AjaxUpdateQuantity", "Cart")',{productId:id,quantity:qty})
+                 .done(res=>{ if(res.success){ r.find('.item-total').text(res.itemTotal+' ₫'); recalc(); $('#cart-count-badge').text(res.cartItemCount);} else alert(res.message); })
+                 .fail(()=>alert('Lỗi server'))
+                 .always(()=>r.removeClass('opacity-50'));
+            }
+            $(document).on('click','.btn-quantity-change',function(){
+                const id=$(this).data('id'),dc=+$(this).data('change'),inp=$('#cart-row-'+id+' .quantity-input');
+                let q=parseInt(inp.val())+dc; if(q>0){ inp.val(q); upd(id,q);}            });
+
+            $(document).on('click','.btn-remove-item',function(){
+                const id=$(this).data('id'),r=$('#cart-row-'+id);
+                if(!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+                r.addClass('opacity-50');
+                $.post('@Url.Action("AjaxRemoveItem", "Cart")',{productId:id})
+                 .done(res=>{ if(res.success){ r.fadeOut(200,()=>{ r.remove(); recalc(); $('#cart-count-badge').text(res.cartItemCount); }); } else { alert(res.message); r.removeClass('opacity-50');}})
+                 .fail(()=>{alert('Lỗi server'); r.removeClass('opacity-50');});
+            });
+
+            $('#delete-selected').click(function(){
+                const sels=$('.row-select:checked'); if(!sels.length) return;
+                if(!confirm('Xóa các sản phẩm đã chọn?')) return;
+                sels.each(function(){
+                    const row=$(this).closest('.cart-item-row'),id=row.attr('id').split('-')[2];
+                    row.addClass('opacity-50');
+                    $.post('@Url.Action("AjaxRemoveItem", "Cart")',{productId:id})
+                     .done(res=>{ if(res.success){ row.fadeOut(200,()=>{row.remove(); recalc(); $('#cart-count-badge').text(res.cartItemCount);}); } else { alert(res.message); row.removeClass('opacity-50'); } })
+                     .fail(()=>{alert('Lỗi server'); row.removeClass('opacity-50');});
+                });
+            });
+
+            $(document).on('click','.btn-wishlist',function(e){
+                e.preventDefault(); const id=$(this).data('id');
+                $.post('@Url.Action("Toggle", "Favorite")',{productId:id})
+                 .done(res=>{ if(res.success) window.location='@Url.Action("Index", "Favorite")'; else alert(res.message); })
+                 .fail(()=>alert('Lỗi server'));
+            });
+
+            recalc();
+        });
+    </script>
+}

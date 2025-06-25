@@ -1,0 +1,14 @@
+﻿@using E_Sport.Models
+
+@model Category
+
+<h2>Xác nhận xóa</h2>
+
+<div>
+    <p>Bạn có chắc chắn muốn xóa danh mục "<strong>@Model.Name</strong>" không?</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

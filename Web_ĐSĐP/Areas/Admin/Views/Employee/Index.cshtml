@@ -1,0 +1,51 @@
+﻿@using E_Sport.Models
+@model IEnumerable<ApplicationUser>
+
+@{
+    ViewData["Title"] = "Danh sách nhân viên";
+    var rolesPerUser = ViewBag.RolesPerUser as Dictionary<string, string>;
+    Layout = "~/Areas/Admin/Views/Shared/_EmployeeLayout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-action="Add" class="btn btn-primary mb-3">➕ Thêm nhân viên</a>
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>SĐT</th>
+            <th>Vai trò</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            var currentRole = rolesPerUser[user.Id];
+
+            <tr>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.PhoneNumber</td>
+                <td>
+                    <form asp-action="UpdateRole" method="post">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role" class="form-control" style="width: 150px;">
+                            <option value="Admin" selected="@(currentRole == "Admin" ? "selected" : null)">Admin</option>
+                            <option value="Employee" selected="@(currentRole == "Employee" ? "selected" : null)">Employee</option>
+                            <option value="Customer" selected="@(currentRole == "Customer" ? "selected" : null)">Customer</option>
+                        </select>
+                        <button type="submit" class="btn btn-success btn-sm mt-1">Lưu</button>
+                    </form>
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-info btn-sm" style="min-width: 70px;">Chi tiết</a>
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-warning btn-sm" style="min-width: 70px;">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-danger btn-sm" style="min-width: 70px;">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

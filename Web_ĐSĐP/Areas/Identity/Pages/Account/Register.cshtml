@@ -1,0 +1,184 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+@section Styles {
+    <style>
+        .page-wrapper {
+            background-color: #f7f9fc;
+            padding: 3rem 1rem;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-col {
+            padding: 2.5rem 3rem;
+            background-color: #ffffff;
+            flex-basis: 55%;
+        }
+
+        .image-col {
+            flex-basis: 45%;
+            background-image: linear-gradient(rgba(43, 138, 62, 0.7), rgba(43, 138, 62, 0.7)), url('https://images.unsplash.com/photo-1593369196682-6ea5f83d125b?auto=format&fit=crop&q=80&w=1887');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #fff;
+            padding: 2rem;
+        }
+
+            .image-col .brand-icon {
+                width: 80px;
+                height: 80px;
+                background-color: rgba(255,255,255,0.15);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+
+                .image-col .brand-icon i {
+                    font-size: 2.5rem;
+                    color: #fff;
+                }
+
+            .image-col h2 {
+                font-weight: 700;
+                text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+                margin-bottom: 0.5rem;
+            }
+
+            .image-col p {
+                font-size: 1.1rem;
+            }
+
+        .form-col h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-col .intro-text {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .form-control {
+            background-color: #f0f2f5;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+            .form-control:focus {
+                background-color: #fff;
+                border-color: #2b8a3e;
+                box-shadow: 0 0 0 0.2rem rgba(43, 138, 62, 0.25);
+            }
+
+        .btn-submit {
+            background-color: #2b8a3e;
+            border-color: #2b8a3e;
+            color: #fff;
+            font-weight: bold;
+            padding: 12px;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+
+            .btn-submit:hover {
+                background-color: #1a511d;
+                border-color: #1a511d;
+                transform: translateY(-2px);
+            }
+
+        .form-links a {
+            color: #2b8a3e;
+        }
+
+    </style>
+}
+
+<div class="page-wrapper">
+    <div class="card shadow-lg auth-card position-relative">
+        <a asp-controller="Home" asp-action="Index" class="close-btn position-absolute" style="top:15px;right:20px;font-size:1.5rem;color:#aaa;" aria-label="Đóng">&times;</a>
+        <div class="row g-0">
+            <!-- Form Column -->
+            <div class="col-lg-6 form-col">
+                <div class="text-center mb-4">
+                    <a asp-controller="Home" asp-action="Index">
+                        <img src="~/images/logo.png" alt="Logo Đặc Sản Địa Phương" style="max-height:50px;" class="mb-3" />
+                    </a>
+                    <h3 class="fw-bold">Tạo tài khoản mới</h3>
+                    <p class="intro-text">Tham gia cộng đồng yêu đặc sản Việt để mua sắm an tâm với nhiều ưu đãi!</p>
+                </div>
+
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                    <div class="mb-3">
+                        <input asp-for="Input.FullName" class="form-control" placeholder="Họ và Tên" />
+                        <span asp-validation-for="Input.FullName" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="Email" />
+                        <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" placeholder="Mật khẩu" />
+                        <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" placeholder="Xác nhận mật khẩu" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-submit">ĐĂNG KÝ</button>
+                    </div>
+
+                    <p class="text-center small">
+                        Đã có tài khoản?
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-decoration-none">Đăng nhập ngay</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Image Column -->
+            <div class="col-lg-6 d-none d-lg-flex image-col">
+                <div class="brand-icon">
+                    <i class="fas fa-carrot"></i>
+                </div>
+                <h2>Chất lượng từ Nông trại</h2>
+                <p>Đến tận Bàn ăn</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

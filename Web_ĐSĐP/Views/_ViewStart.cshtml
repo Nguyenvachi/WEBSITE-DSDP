@@ -1,0 +1,23 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using E_Sport.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    Layout = "~/Views/Shared/_LayoutShop.cshtml"; // Mặc định cho Customer
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var user = await UserManager.GetUserAsync(User);
+        var roles = await UserManager.GetRolesAsync(user);
+
+        if (roles.Contains("Admin"))
+        {
+            Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+        }
+        else if (roles.Contains("Employee"))
+        {
+            Layout = "~/Areas/Employee/Views/Shared/_EmployeeLayout.cshtml";
+        }
+    }
+}

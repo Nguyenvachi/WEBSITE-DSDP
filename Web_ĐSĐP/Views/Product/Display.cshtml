@@ -1,0 +1,312 @@
+﻿@model E_Sport.Models.ViewModels.ProductDisplayViewModel
+@{
+	ViewData["Title"] = Model.Product?.Name ?? "Không xác định";
+	Layout = "~/Views/Shared/_LayoutShop.cshtml";
+	var product = Model.Product;
+
+	int? discountPercentage = null;
+	if (product?.OldPrice.HasValue == true && product.OldPrice > product.Price)
+	{
+		discountPercentage = (int)Math.Round((1 - (product.Price / product.OldPrice.Value)) * 100);
+	}
+}
+
+<div class="container my-5">
+	<div class="row g-4 product-detail-container">
+		<!-- CỘT TRÁI: HÌNH ẢNH SẢN PHẨM -->
+		<div class="col-lg-6 col-md-6 product-gallery">
+			<div class="main-image-container">
+				<img id="mainImage" src="@Url.Content(product.ImageUrl ?? "~/images/placeholder-image.png")" alt="@product.Name" onerror="this.onerror=null;this.src='~/images/placeholder-image.png';" />
+			</div>
+			@if (product.Images != null && product.Images.Count > 0)
+			{
+				<div class="thumb-list">
+					@if (!string.IsNullOrEmpty(product.ImageUrl))
+					{
+						<img src="@Url.Content(product.ImageUrl)" class="thumb-item active" onclick="changeMainImage(this)" alt="Thumbnail @product.Name" />
+					}
+					@foreach (var img in product.Images)
+					{
+						@if (img.Url != product.ImageUrl)
+						{
+							<img src="@Url.Content(img.Url)" class="thumb-item" onclick="changeMainImage(this)" alt="Thumbnail @product.Name" />
+						}
+					}
+				</div>
+			}
+		</div>
+
+		<!-- CỘT PHẢI: THÔNG TIN VÀ HÀNH ĐỘNG -->
+		<div class="col-lg-6 col-md-6 product-info-wrapper">
+			<h1 class="product-title">@product.Name</h1>
+
+			<div class="rating-section">
+				<span class="stars"><i class="fas fa-star"></i> @Model.AverageRating:F1</span>
+				<span>|</span>
+				<a href="#reviews-section">Xem @Model.TotalReviews đánh giá</a>
+				<span>|</span>
+				<span>Đã bán: @Model.TotalSold</span>
+			</div>
+
+			<div class="price-section">
+				<span class="price-new">@product.Price.ToString("N0")₫</span>
+				@if (product.OldPrice.HasValue && product.OldPrice > product.Price)
+				{
+					<del class="price-old">@product.OldPrice.Value.ToString("N0")₫</del>
+					@if (discountPercentage.HasValue)
+					{
+						<span class="discount-badge-detail">-@discountPercentage%</span>
+					}
+				}
+			</div>
+
+			<div class="product-meta-info mb-4">
+				@if (product.Category != null)
+				{
+					<p class="mb-1"><strong>Danh mục:</strong> <a asp-controller="Home" asp-action="Index" asp-route-selectedCategoryIds="@product.CategoryId">@product.Category.Name</a></p>
+				}
+				@if (product.Region != null)
+				{
+					<p class="mb-1"><strong>Xuất xứ:</strong> <a asp-controller="Home" asp-action="Index" asp-route-selectedOrigins="@product.Region.Name">@product.Region.Name</a></p>
+				}
+			</div>
+
+			<form asp-controller="Cart" asp-action="AddToCartAjax" method="post" id="addToCartForm">
+				<input type="hidden" name="productId" value="@product.Id" />
+
+				<div class="packaging-options mb-4">
+					<strong class="d-block mb-2">Đóng gói:</strong>
+					<div>
+						@foreach (var pack in Model.PackOptions)
+						{
+							var activeClass = pack == Model.SelectedPack ? "active" : "";
+							<button type="button" class="btn option-btn @activeClass" onclick="selectPack('@pack')">@pack</button>
+						}
+					</div>
+				</div>
+
+				<div class="quantity-actions mb-4">
+					<label for="quantityInput" class="form-label fw-bold d-block mb-2">Số lượng:</label>
+					<div class="d-flex align-items-center">
+						<div class="input-group">
+							<button type="button" class="btn btn-outline-secondary" onclick="changeQuantity(-1)">-</button>
+							<input type="number" name="quantity" id="quantityInput" value="1" min="1" max="@product.StockQuantity" class="form-control text-center fw-bold" />
+							<button type="button" class="btn btn-outline-secondary" onclick="changeQuantity(1)">+</button>
+						</div>
+						@if (product.StockQuantity > 0)
+						{
+							<span class="stock-info ms-3">Chỉ còn @product.StockQuantity sản phẩm có sẵn</span>
+						}
+					</div>
+				</div>
+
+				<div class="action-buttons">
+					<button type="submit" class="btn btn-outline-success" disabled="@(product.StockQuantity <= 0)">Thêm vào giỏ hàng</button>
+					<button type="button" class="btn btn-success" disabled="@(product.StockQuantity <= 0)" onclick="buyNow()">Mua ngay</button>
+				</div>
+			</form>
+
+			<div class="info-list-box mt-4">
+				<ul class="info-list">
+					<li><i class="fas fa-check-circle"></i> Cam kết nông sản chất lượng cao.</li>
+					<li><i class="fas fa-undo-alt"></i> Hỗ trợ đổi trả nếu sản phẩm có lỗi.</li>
+					<li><i class="fas fa-phone-alt"></i> Gọi tư vấn: <a href="tel:02877702614">028 7770 2614</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- THÔNG TIN CHI TIẾT SẢN PHẨM -->
+<div class="product-detail-tabs mt-5">
+	<ul class="nav nav-tabs" id="productTab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">Mô tả sản phẩm</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="spec-tab" data-bs-toggle="tab" data-bs-target="#spec" type="button" role="tab">Thông số</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="guide-tab" data-bs-toggle="tab" data-bs-target="#guide" type="button" role="tab">Hướng dẫn</button>
+		</li>
+	</ul>
+	<div class="tab-content p-4 bg-white border border-top-0 rounded-bottom-3" id="productTabContent">
+		<div class="tab-pane fade show active" id="desc" role="tabpanel">
+			<h5>Mô tả sản phẩm</h5>
+			<div>@Html.Raw(product.Description ?? "Chưa có mô tả.")</div>
+		</div>
+		<div class="tab-pane fade" id="spec" role="tabpanel">
+			<h5>Thông tin chi tiết</h5>
+			<table class="table table-borderless w-auto">
+				<tr>
+					<th>Mã SP</th>
+					<td>@product.Id</td>
+				</tr>
+				<tr>
+					<th>Danh mục</th>
+					<td>@product.Category?.Name</td>
+				</tr>
+				<tr>
+					<th>Xuất xứ</th>
+					<td>@product.Region?.Name</td>
+				</tr>
+				<tr>
+					<th>Trọng lượng</th>
+					<td>@product.Weight @product.Unit</td>
+				</tr>
+				<tr>
+					<th>Đơn vị</th>
+					<td>@product.Unit</td>
+				</tr>
+				<tr>
+					<th>Tình trạng</th>
+					<td>
+						@(product.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")
+					</td>
+				</tr>
+				<tr>
+					<th>Khuyến mãi</th>
+					<td>
+						@if (!string.IsNullOrEmpty(Model.PromoCode))
+						{
+							<span class="badge bg-warning text-dark">@Model.PromoCode</span>
+						}
+						else
+						{
+							<span>Không có</span>
+						}
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="tab-pane fade" id="guide" role="tabpanel">
+			<h5>Sau khi nhận Sầu Riêng cần : - Lấy sầu ra, đặt ở nơi khô ráo, thoáng mát, có thể giữ lại bìa thùng để lót- TUYỆT ĐỐI KHÔNG để sầu trong thùng, vì sẽ dễ dẫn đến sầu bị úng và hư- Sầu có mùi thơm, vỏ hơi chuyển màu hoặc cuống rụng là có thể khui được. Nếu dấu hiệu chưa rõ ràng, khách hàng có thể liên hệ cùng FoodMap qua fanpage, zalo hoặc hotline để được hỗ trợ.</h5>
+		</div>
+	</div>
+</div>
+
+
+<!-- PHẦN ĐÁNH GIÁ SẢN PHẨM -->
+<section id="reviews-section" class="container my-5">
+	<hr />
+	<h4>Đánh giá sản phẩm</h4>
+	<div>
+		@foreach (var r in (IEnumerable<E_Sport.Models.Review>)ViewBag.Reviews)
+		{
+			@Html.Partial("_ReviewItem", r)
+		}
+	</div>
+
+	<h5 class="mt-4 mb-3 fw-semibold">Viết đánh giá của bạn</h5>
+	<form asp-action="AddReview" asp-controller="Product" method="post" class="bg-light p-4 rounded-4 shadow-sm mb-4">
+		@Html.AntiForgeryToken()
+		<input type="hidden" asp-for="NewReview.ProductId" />
+		<div class="mb-3">
+			<label asp-for="NewReview.ReviewerName" class="form-label">Tên bạn</label>
+			<input asp-for="NewReview.ReviewerName" class="form-control form-control-lg" />
+			<span asp-validation-for="NewReview.ReviewerName" class="text-danger"></span>
+		</div>
+		<div class="mb-3">
+			<label asp-for="NewReview.Rating" class="form-label">Đánh giá</label>
+			<div id="starRating" class="d-flex gap-1 mb-2">
+				@for (int i = 1; i <= 5; i++)
+				{
+					<i class="fas fa-star fa-2x star-select text-warning" data-value="@i" style="cursor:pointer;"></i>
+				}
+			</div>
+			<input type="hidden" asp-for="NewReview.Rating" id="RatingInput" />
+			<span asp-validation-for="NewReview.Rating" class="text-danger"></span>
+		</div>
+		<div class="mb-3">
+			<label asp-for="NewReview.Comment" class="form-label">Nội dung</label>
+			<textarea asp-for="NewReview.Comment" class="form-control" rows="3"></textarea>
+			<span asp-validation-for="NewReview.Comment" class="text-danger"></span>
+		</div>
+		<button type="submit" class="btn btn-primary px-4">Gửi đánh giá</button>
+	</form>
+
+</section>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		function changeMainImage(thumbElement) {
+			document.getElementById('mainImage').src = thumbElement.src;
+			document.querySelectorAll('.thumb-item').forEach(thumb => thumb.classList.remove('active'));
+			thumbElement.classList.add('active');
+		}
+
+		function selectPack(pack) {
+			document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+			document.querySelector(`.option-btn:contains('${pack}')`).classList.add('active');
+		}
+
+		function changeQuantity(amount) {
+			let qtyInput = document.getElementById('quantityInput');
+			let currentQty = parseInt(qtyInput.value);
+			let newQty = currentQty + amount;
+			const maxStock = parseInt(qtyInput.getAttribute('max')) || 1;
+			if (newQty < 1) newQty = 1;
+			if (newQty > maxStock) newQty = maxStock;
+			qtyInput.value = newQty;
+		}
+
+		$('#addToCartForm').on('submit', function (e) {
+			e.preventDefault();
+			var form = $(this);
+			var btn = form.find('button[type="submit"]');
+			var btnOriginalHtml = btn.html();
+			btn.html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...').prop('disabled', true);
+
+			$.ajax({
+				type: "POST",
+				url: '@Url.Action("AddToCartAjax", "Cart")',
+				data: form.serialize(),
+				success: function (response) {
+					if (response.success) {
+						$('#cart-count-badge').text(response.cartCount);
+						alert(response.message);
+					} else {
+						alert(response.message || "Có lỗi xảy ra.");
+					}
+				},
+				error: function () {
+					alert("Không thể thêm vào giỏ hàng. Vui lòng thử lại.");
+				},
+				complete: function () {
+					btn.html(btnOriginalHtml).prop('disabled', false);
+				}
+			});
+		});
+
+		function buyNow() {
+			const form = $('#addToCartForm');
+			$.ajax({
+				type: "POST",
+				url: '@Url.Action("AddToCartAjax", "Cart")',
+				data: form.serialize(),
+				success: function (response) {
+					if (response.success) {
+						window.location.href = '@Url.Action("Checkout", "Order")';
+					} else {
+						alert(response.message || "Có lỗi xảy ra.");
+					}
+				},
+				error: function () {
+					alert("Không thể thực hiện Mua Ngay. Vui lòng thử lại.");
+				}
+			});
+		}
+
+		$(document).ready(function () {
+			$('.star-select').click(function () {
+				var val = $(this).data('value');
+				$('#RatingInput').val(val);
+				$('.star-select').each(function (i, el) {
+					$(el).toggleClass('text-warning', i < val);
+					$(el).toggleClass('text-secondary', i >= val);
+				});
+			});
+		});
+	</script>
+}

@@ -1,0 +1,161 @@
+﻿@model IEnumerable<E_Sport.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_EmployeeLayout.cshtml"; // Giữ nguyên layout của bạn
+}
+
+@* Các link CDN này nên được đặt trong file Layout chính để tránh lặp lại *@
+@* <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" /> *@
+@* <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> *@
+@* <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> *@
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>@ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <!-- BỘ LỌC SERVER-SIDE -->
+            <form asp-action="Index" method="get" class="mb-4 p-3 bg-light border rounded">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="searchQuery" class="form-label fw-semibold">Tìm kiếm</label>
+                        <input type="text" name="searchQuery" id="searchQuery" class="form-control" placeholder="Tên, email, SĐT khách hàng..." value="@ViewBag.SearchQuery" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="statusFilter" class="form-label fw-semibold">Trạng thái đơn hàng</label>
+                        <select name="statusFilter" id="statusFilter" class="form-select">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="PendingConfirmation" selected="@("PendingConfirmation" == (string)ViewBag.StatusFilter)">Chờ xác nhận</option>
+                            <option value="PendingPayment" selected="@("PendingPayment" == (string)ViewBag.StatusFilter)">Chờ thanh toán</option>
+                            <option value="Paid" selected="@("Paid" == (string)ViewBag.StatusFilter)">Đã thanh toán</option>
+                            <option value="Processing" selected="@("Processing" == (string)ViewBag.StatusFilter)">Đang xử lý</option>
+                            <option value="Shipped" selected="@("Shipped" == (string)ViewBag.StatusFilter)">Đang giao hàng</option>
+                            <option value="Completed" selected="@("Completed" == (string)ViewBag.StatusFilter)">Đã hoàn thành</option>
+                            <option value="Cancelled" selected="@("Cancelled" == (string)ViewBag.StatusFilter)">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-1"></i> Lọc đơn hàng</button>
+                    </div>
+                </div>
+            </form>
+
+            <table id="orderTable" class="table table-hover table-bordered align-middle" style="width:100%">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th class="text-center">Số SP</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Thanh toán</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th style="width: 120px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td><strong>#@order.Id</strong></td>
+                            <td>
+                                <div>@order.FullName</div>
+                                <small class="text-muted">@order.Phone</small>
+                            </td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-center">@order.OrderDetails.Sum(od => od.Quantity)</td>
+                            <td class="text-end fw-bold">@order.TotalAmount.ToString("N0") ₫</td>
+                            <td class="text-center">
+                                @{
+                                    var paymentBadge = order.PaymentMethod switch
+                                    {
+                                        "COD" => "badge bg-info text-dark",
+                                        "VNPAY" => "badge bg-danger",
+                                        "BankTransfer" => "badge bg-warning text-dark",
+                                        _ => "badge bg-secondary"
+                                    };
+                                    var paymentText = order.PaymentMethod switch
+                                    {
+                                        "COD" => "COD",
+                                        "VNPAY" => "VNPAY",
+                                        "BankTransfer" => "Chuyển khoản",
+                                        _ => order.PaymentMethod
+                                    };
+                                }
+                                <span class="@paymentBadge">@paymentText</span>
+                            </td>
+                            <td class="text-center">
+                                @{
+                                    var statusBadge = order.Status switch
+                                    {
+                                        "PendingConfirmation" => "badge bg-warning text-dark",
+                                        "PendingPayment" => "badge bg-secondary",
+                                        "Paid" => "badge bg-primary",
+                                        "Processing" => "badge bg-info text-dark",
+                                        "Shipped" => "badge bg-primary",
+                                        "Completed" => "badge bg-success",
+                                        "Cancelled" => "badge bg-danger",
+                                        _ => "badge bg-dark"
+                                    };
+                                    var statusText = order.Status switch
+                                    {
+                                        "PendingConfirmation" => "Chờ xác nhận",
+                                        "PendingPayment" => "Chờ thanh toán",
+                                        "Paid" => "Đã thanh toán",
+                                        "Processing" => "Đang xử lý",
+                                        "Shipped" => "Đang giao",
+                                        "Completed" => "Hoàn thành",
+                                        "Cancelled" => "Đã hủy",
+                                        _ => order.Status
+                                    };
+                                }
+                                <span class="@statusBadge">@statusText</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-outline-info btn-sm" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="EditStatus" asp-route-id="@order.Id" class="btn btn-outline-warning btn-sm" title="Sửa trạng thái">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (User.IsInRole("Admin")) // Chỉ Admin mới thấy nút xóa
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-outline-danger btn-sm" title="Xóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo DataTables nhưng tắt các tính năng lọc/sắp xếp của nó
+            // vì chúng ta đã xử lý ở server-side.
+            $('#orderTable').DataTable({
+                "language": {
+                    "search": "🔎 Tìm trong bảng này:",
+                    "lengthMenu": "Hiển thị _MENU_ đơn hàng",
+                    "info": "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ đơn hàng",
+                    "infoEmpty": "Không có đơn hàng nào để hiển thị",
+                    "infoFiltered": "", // Bỏ "(filtered from _MAX_ total entries)"
+                    "zeroRecords": "Không tìm thấy đơn hàng nào phù hợp",
+                    "paginate": { "first": "<<", "last": ">>", "next": ">", "previous": "<" }
+                },
+                "pageLength": 10,
+                "lengthMenu": [10, 25, 50, 100],
+                "order": [], // Tắt sắp xếp mặc định của DataTables, giữ nguyên thứ tự từ server
+                "searching": true // Giữ lại ô tìm kiếm client-side để lọc nhanh trên trang hiện tại
+            });
+        });
+    </script>
+}

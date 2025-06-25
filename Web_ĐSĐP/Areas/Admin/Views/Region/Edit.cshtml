@@ -1,0 +1,76 @@
+﻿@model E_Sport.Models.Region
+@{
+    ViewData["Title"] = "Chỉnh sửa Vùng miền: " + Model.Name;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">✏️ @ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ImageUrl" /> @* Giữ lại ảnh cũ nếu không có ảnh mới được tải lên *@
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imageUrlFile" class="form-label fw-semibold">Thay đổi ảnh đại diện (nếu muốn)</label>
+                            <input type="file" name="imageUrlFile" id="imageUrlFile" class="form-control" />
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="mt-2">
+                                    <img src="@Url.Content(Model.ImageUrl)" alt="Ảnh hiện tại" class="img-thumbnail" style="max-width: 150px;" />
+                                    <p class="text-muted mb-0"><small>Ảnh hiện tại</small></p>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded border">
+                            <h6 class="fw-bold">Cấu hình hiển thị</h6>
+                            <hr />
+                            <div class="form-check form-switch mt-3">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">Hiển thị vùng miền này?</label>
+                                <small class="form-text text-muted d-block">Bỏ chọn nếu bạn muốn tạm ẩn vùng miền này khỏi các bộ lọc.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-warning me-2">
+                        <i class="fas fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

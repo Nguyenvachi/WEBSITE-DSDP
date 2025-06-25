@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using E_Sport.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var user = await UserManager.GetUserAsync(User);
+        var fullName = user?.FullName;
+
+        <li class="nav-item dropdown">
+            @* SỬA LỖI: Thêm các thuộc tính data-bs-* cho dropdown *@
+            <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-circle me-2"></i>
+                <span>Chào, @(string.IsNullOrEmpty(fullName) ? User.Identity?.Name : fullName)!</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage"><i class="fas fa-user-cog me-2"></i>Quản lý Tài khoản</a></li>
+                <li><a class="dropdown-item" asp-controller="Customer" asp-action="OrderHistory"><i class="fas fa-history me-2"></i>Lịch sử Đơn hàng</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button type="submit" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Register"><i class="fas fa-user-plus me-2"></i>Đăng ký</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Login"><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</a>
+        </li>
+    }
+</ul>

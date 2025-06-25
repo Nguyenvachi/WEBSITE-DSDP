@@ -1,0 +1,60 @@
+﻿@model IEnumerable<E_Sport.Models.Order>
+
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+}
+
+<h3 class="mt-4"><i class="bi bi-receipt-cutoff me-2"></i> Lịch sử đơn hàng</h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-3">Bạn chưa có đơn hàng nào.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped mt-3 align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>📅 Ngày đặt</th>
+                <th>💰 Tổng tiền</th>
+                <th>🚦 Trạng thái</th>
+                <th>🔍 Chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                var badgeClass = order.Status switch
+                {
+                    "Pending" => "bg-warning text-dark",
+                    "Approved" => "bg-success",
+                    "Cancelled" => "bg-danger",
+                    _ => "bg-secondary"
+                };
+
+                var statusText = order.Status switch
+                {
+                    "Pending" => "Chờ xác nhận",
+                    "Approved" => "Đã duyệt",
+                    "Cancelled" => "Đã hủy",
+                    _ => order.Status
+                };
+
+                <tr class="text-center">
+                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                    <td>@order.TotalAmount.ToString("N0") VNĐ</td>
+                    <td><span class="badge @badgeClass">@statusText</span></td>
+                    <td>
+                        <a asp-controller="Customer"
+                           asp-action="OrderDetails"
+                           asp-route-id="@order.Id"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

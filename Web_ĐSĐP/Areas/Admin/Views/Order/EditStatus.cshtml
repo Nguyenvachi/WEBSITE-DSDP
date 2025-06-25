@@ -1,0 +1,53 @@
+﻿@model E_Sport.Models.Order
+@{
+    ViewData["Title"] = "Cập nhật Trạng thái Đơn hàng #" + Model.Id;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">✏️ @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Hiển thị thông tin tóm tắt của đơn hàng -->
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <p class="mb-1"><strong>Khách hàng:</strong> @Model.FullName</p>
+                        <p class="mb-1"><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p class="mb-0"><strong>Tổng tiền:</strong> <span class="fw-bold text-danger">@Model.TotalAmount.ToString("N0") ₫</span></p>
+                    </div>
+
+                    <form asp-action="EditStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label fw-semibold fs-5"></label>
+                            <select asp-for="Status" asp-items="@ViewBag.PossibleStatuses" class="form-select form-select-lg">
+                                <!-- Các option sẽ được điền từ ViewBag.PossibleStatuses -->
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning me-2">
+                                <i class="fas fa-save me-1"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

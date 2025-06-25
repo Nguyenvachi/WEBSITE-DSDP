@@ -1,0 +1,31 @@
+﻿@model E_Sport.Models.ConfirmAccountViewModel
+
+@{
+    ViewData["Title"] = "Xác nhận tài khoản nhân viên";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="ConfirmAccount" method="post">
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="Token" />
+
+    <div class="form-group">
+        <label asp-for="Password" class="form-label">Mật khẩu mới</label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
+        <input asp-for="ConfirmPassword" class="form-control" type="password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Xác nhận & Tạo mật khẩu</button>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-2">Trang chủ</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

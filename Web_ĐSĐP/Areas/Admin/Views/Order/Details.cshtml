@@ -1,0 +1,165 @@
+﻿@model E_Sport.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết Đơn hàng #" + Model.Id;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div id="invoiceContent">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-file-invoice me-2"></i>@ViewData["Title"]</h4>
+                <div class="d-print-none">
+                    <a asp-action="EditStatus" asp-route-id="@Model.Id" class="btn btn-light btn-sm me-2">
+                        <i class="fas fa-edit me-1"></i> Cập nhật Trạng thái
+                    </a>
+                    <button onclick="window.print()" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-print me-1"></i> In Hóa đơn
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <!-- Thông tin chung & khách hàng -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Thông tin Khách hàng</h5>
+                        <hr class="mt-1" />
+                        <p class="mb-1"><strong>Tên khách hàng:</strong> @Model.FullName</p>
+                        <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Phone</p>
+                        <p class="mb-1"><strong>Email:</strong> @Model.UserEmail</p>
+                        <p class="mb-1"><strong>Địa chỉ giao hàng:</strong> @Model.ShippingAddress</p>
+                        @if (!string.IsNullOrEmpty(Model.Note))
+                        {
+                            <p class="mb-1"><strong>Ghi chú:</strong> <em>@Model.Note</em></p>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Thông tin Đơn hàng</h5>
+                        <hr class="mt-1" />
+                        <p class="mb-1"><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p class="mb-1">
+                            <strong>Phương thức thanh toán:</strong>
+                            @{
+                                var paymentText = Model.PaymentMethod switch
+                                {
+                                    "COD" => "Thanh toán khi nhận hàng (COD)",
+                                    "VNPAY" => "Thanh toán qua VNPAY",
+                                    "BankTransfer" => "Chuyển khoản ngân hàng",
+                                    _ => Model.PaymentMethod
+                                };
+                            }
+                            @paymentText
+                        </p>
+                        <p class="mb-1">
+                            <strong>Trạng thái:</strong>
+                            @{
+                                var statusBadge = Model.Status switch
+                                {
+                                    "PendingConfirmation" => "badge bg-warning text-dark",
+                                    "PendingPayment" => "badge bg-secondary",
+                                    "Paid" => "badge bg-primary",
+                                    "Processing" => "badge bg-info text-dark",
+                                    "Shipped" => "badge bg-primary",
+                                    "Completed" => "badge bg-success",
+                                    "Cancelled" => "badge bg-danger",
+                                    _ => "badge bg-dark"
+                                };
+                                var statusText = Model.Status switch
+                                {
+                                    "PendingConfirmation" => "Chờ xác nhận",
+                                    "PendingPayment" => "Chờ thanh toán",
+                                    "Paid" => "Đã thanh toán",
+                                    "Processing" => "Đang xử lý",
+                                    "Shipped" => "Đang giao",
+                                    "Completed" => "Hoàn thành",
+                                    "Cancelled" => "Đã hủy",
+                                    _ => Model.Status
+                                };
+                            }
+                            <span class="@statusBadge">@statusText</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Danh sách sản phẩm -->
+                <h5 class="text-primary">Chi tiết Sản phẩm</h5>
+                <hr class="mt-1" />
+                @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                {
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" style="width: 80px;">Ảnh</th>
+                                <th scope="col">Tên sản phẩm</th>
+                                <th scope="col" class="text-center">Số lượng</th>
+                                <th scope="col" class="text-end">Đơn giá</th>
+                                <th scope="col" class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@Url.Content(item.Product?.ImageUrl ?? "/images/placeholder-image.png")" width="60" class="img-thumbnail"
+                                             onerror="this.onerror=null;this.src='/images/placeholder-image.png';" />
+                                    </td>
+                                    <td>
+                                        <strong>@item.ProductName</strong>
+                                        <br />
+                                        <small class="text-muted">Mã SP: @item.ProductId</small>
+                                        @if (!string.IsNullOrEmpty(item.Unit))
+                                        {
+                                            <small class="text-muted"> | ĐVT: @item.Unit</small>
+                                        }
+                                    </td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">@item.Price.ToString("N0") ₫</td>
+                                    <td class="text-end fw-bold">@((item.Quantity * item.Price).ToString("N0")) ₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold fs-5">
+                                <td colspan="4" class="text-end">Tổng cộng:</td>
+                                <td class="text-end text-danger">@Model.TotalAmount.ToString("N0") ₫</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-warning">Đơn hàng này không có chi tiết sản phẩm.</div>
+                }
+
+                <!-- Footer của hóa đơn -->
+                <div class="text-center mt-5" style="border-top: 1px dashed #ccc; padding-top: 20px;">
+                    <h5 class="fw-bold">Đặc Sản Địa Phương</h5>
+                    <p class="mb-0 text-muted">Cảm ơn quý khách đã tin tưởng và đặt hàng!</p>
+                    <p class="text-muted"><small>Đây là hóa đơn chi tiết được tạo tự động bởi hệ thống.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 d-print-none">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách Đơn hàng
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* CSS để ẩn các nút khi in */
+        @@media print {
+            .d-print-none {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+}
